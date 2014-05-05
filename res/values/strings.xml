@@ -3,4 +3,5 @@
     <string name="app_name">Todo</string>
     <string name="todo_input_hint">What\'s up ?</string>
     <string name="todo_submit_text">Send</string>
+    <string name="provider_label">Tasks</string>
 </resources>

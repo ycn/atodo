@@ -1,6 +1,7 @@
 package cc.ycn.todo;
 
 import android.app.Activity;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Button;
@@ -8,7 +9,10 @@ import android.widget.EditText;
 import cc.ycn.util.UserInputHelper;
 
 public class MainActivity extends Activity {
-    private static final String TAG = "aTodo";
+    private static final String TAG = "aTodo_main";
+
+    private SharedPreferences settings;
+
     private EditText todoInput;
     private Button todoSubmit;
     private String inputText;
@@ -25,7 +29,8 @@ public class MainActivity extends Activity {
     }
 
     private void initStates() {
-        inputText = "";
+        settings = getSharedPreferences(TAG, MODE_PRIVATE);
+        inputText = settings.getString("inputText", "");
     }
 
     private void appSetup() {
@@ -91,6 +96,10 @@ public class MainActivity extends Activity {
     protected void onDestroy() {
         super.onDestroy();
         Log.d(TAG, "onDestroy");
+
+        SharedPreferences.Editor edit = settings.edit();
+        edit.putString("inputText", inputText);
+        edit.commit();
     }
 
 }
