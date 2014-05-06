@@ -33,7 +33,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scrollbars="vertical">
-
+            <ListView
+                    android:id="@+id/todo_tasks"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+            </ListView>
     </ScrollView>
 
 </LinearLayout>

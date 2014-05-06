@@ -1,8 +1,6 @@
 package cc.ycn.view;
 
-import android.database.sqlite.SQLiteDatabase;
-
-public class Task extends Base {
+public class Task extends BaseView {
     public String content = "N/A";
     public boolean done = false;
 
