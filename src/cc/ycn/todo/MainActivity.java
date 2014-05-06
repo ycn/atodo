@@ -24,6 +24,7 @@ public class MainActivity extends Activity {
     private ListView todoTasks;
     private List<Task> taskList;
 
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,6 +51,7 @@ public class MainActivity extends Activity {
         todoInput = (EditText) findViewById(R.id.todo_input);
         todoSubmit = (Button) findViewById(R.id.todo_submit);
         todoTasks = (ListView) findViewById(R.id.todo_tasks);
+        todoTasks.setAdapter(new TaskAdapter(this, R.layout.task, taskList));
     }
 
     private void setListeners() {
