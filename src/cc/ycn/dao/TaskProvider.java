@@ -72,7 +72,7 @@ public class TaskProvider extends ContentProvider implements BaseProvider {
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
+    public synchronized Uri insert(Uri uri, ContentValues values) {
         int match = matcher.match(uri);
         if (match != TASK_ALL) {
             throw new IllegalArgumentException("Wrong URI: " + uri);
@@ -89,7 +89,7 @@ public class TaskProvider extends ContentProvider implements BaseProvider {
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public synchronized int delete(Uri uri, String selection, String[] selectionArgs) {
         int match = matcher.match(uri);
         if (match != TASK_ALL) {
             throw new IllegalArgumentException("Wrong URI: " + uri);
@@ -103,7 +103,7 @@ public class TaskProvider extends ContentProvider implements BaseProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public synchronized int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         int match = matcher.match(uri);
         if (match != TASK_ALL) {
             throw new IllegalArgumentException("Wrong URI: " + uri);
@@ -128,6 +128,7 @@ public class TaskProvider extends ContentProvider implements BaseProvider {
                 + ",createTime INTEGER"
                 + ",updateTime INTEGER"
                 + ",content VARCHAR"
+                + ",done INTEGER"
                 + ")";
         db.execSQL(sql);
     }
@@ -141,7 +142,7 @@ public class TaskProvider extends ContentProvider implements BaseProvider {
 
     @Override
     public void upgradeTable(SQLiteDatabase db, int oldVersion, int newVersion) {
-        //        deleteTable(db);
-        //        createTable(db);
+        deleteTable(db);
+        createTable(db);
     }
 }

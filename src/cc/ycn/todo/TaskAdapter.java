@@ -1,6 +1,9 @@
 package cc.ycn.todo;
 
 import android.app.Activity;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.database.Cursor;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -8,6 +11,7 @@ import android.widget.BaseAdapter;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.TextView;
+import cc.ycn.dao.TaskProvider;
 import cc.ycn.view.Task;
 
 import java.text.DateFormat;
@@ -27,15 +31,17 @@ public class TaskAdapter extends BaseAdapter {
     private Activity context;
     private int resourceId;
     private List<Task> taskList;
+    private ContentResolver resolver;
 
 
-    public TaskAdapter(Activity context, int resourceId, List<Task> taskList) {
+    public TaskAdapter(Activity context, int resourceId, List<Task> taskList, ContentResolver resolver) {
         this.context = context;
         this.resourceId = resourceId;
         this.taskList = taskList;
         if (this.taskList == null) {
             this.taskList = new LinkedList<Task>();
         }
+        this.resolver = resolver;
     }
 
     @Override
@@ -54,7 +60,7 @@ public class TaskAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, ViewGroup parent) {
         ViewHolder holder;
 
         if (convertView == null) {
@@ -63,12 +69,6 @@ public class TaskAdapter extends BaseAdapter {
 
             holder = new ViewHolder();
             holder.taskCheck = (CheckBox) convertView.findViewById(R.id.task_check);
-            holder.taskCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-                @Override
-                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                    taskList.get(position).done = isChecked;
-                }
-            });
             holder.taskContent = (TextView) convertView.findViewById(R.id.task_content);
             holder.taskMeta = (TextView) convertView.findViewById(R.id.task_meta);
 
@@ -78,12 +78,50 @@ public class TaskAdapter extends BaseAdapter {
         }
 
 
-        Task task = taskList.get(position);
+        final Task task = taskList.get(position);
         holder.taskCheck.setChecked(task.done);
+        holder.taskCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                done(task, isChecked);
+            }
+        });
         holder.taskContent.setText(task.content);
         holder.taskMeta.setText(getDate(task.createTime));
 
         return convertView;
+    }
+
+    public void add(Task task) {
+        taskList.add(0, task);
+        ContentValues values = new ContentValues();
+        values.put("content", task.content);
+        values.put("createTime", task.createTime);
+        values.put("updateTime", task.updateTime);
+        values.put("done", task.done);
+        resolver.insert(TaskProvider.TASK_ALL_URI, values);
+        notifyDataSetChanged();
+    }
+
+    public void done(Task task, boolean done) {
+        task.done = done;
+        ContentValues values = new ContentValues();
+        values.put("done", task.done);
+        values.put("updateTime", System.currentTimeMillis());
+        resolver.update(TaskProvider.TASK_ALL_URI, values, "_id = ?", new String[]{task._id + ""});
+        notifyDataSetChanged();
+    }
+
+    public void queryList() {
+        Cursor cursor = resolver.query(TaskProvider.TASK_ALL_URI, null, null, null, null);
+        while (cursor.moveToNext()) {
+            Task task = new Task(cursor.getString(cursor.getColumnIndex("content")));
+            task._id = cursor.getInt(cursor.getColumnIndex("_id"));
+            task.createTime = cursor.getLong(cursor.getColumnIndex("createTime"));
+            task.updateTime = cursor.getLong(cursor.getColumnIndex("updateTime"));
+            task.done = cursor.getInt(cursor.getColumnIndex("done")) == 1;
+            taskList.add(0, task);
+        }
     }
 
     private String getDate(long timeStamp) {

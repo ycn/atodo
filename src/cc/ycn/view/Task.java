@@ -12,4 +12,14 @@ public class Task extends BaseView {
         super();
         this.content = content;
     }
+
+    @Override
+    public String toString() {
+        StringBuffer buff = new StringBuffer();
+        buff.append("[");
+        buff.append("content=" + content);
+        buff.append(",done=" + done);
+        buff.append("]");
+        return buff.toString();
+    }
 }

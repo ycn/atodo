@@ -1,6 +1,7 @@
 package cc.ycn.todo;
 
 import android.app.Activity;
+import android.content.ContentResolver;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,7 +14,6 @@ import cc.ycn.view.Task;
 import cc.ycn.view.ViewUtils;
 
 import java.util.LinkedList;
-import java.util.List;
 
 public class MainActivity extends Activity {
     private static final String TAG = "aTodo_main";
@@ -24,38 +24,27 @@ public class MainActivity extends Activity {
     private String inputText;
     private ListView todoTasks;
     private LinkedList<Task> taskList;
-
-
-    private View.OnClickListener onSubmit = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            inputText = UserInputHelper.getString(todoInput.getText().toString());
-            if (inputText != "") {
-                taskList.add(0, new Task(inputText));
-            }
-        }
-    };
+    private TaskAdapter taskAdapter;
+    private ContentResolver resolver;
 
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
-        initStates();
         appSetup();
         findViews();
         setListeners();
         setDefaults();
     }
 
-    private void initStates() {
+    private void appSetup() {
         settings = getSharedPreferences(TAG, MODE_PRIVATE);
         Log.d(TAG, "SharedPreferences:" + settings.getAll().toString());
         taskList = new LinkedList<Task>();
-    }
-
-
-    private void appSetup() {
+        resolver = getContentResolver();
+        taskAdapter = new TaskAdapter(this, R.layout.task, taskList, resolver);
+        taskAdapter.queryList();
         setContentView(R.layout.main);
     }
 
@@ -63,15 +52,22 @@ public class MainActivity extends Activity {
         todoInput = (EditText) findViewById(R.id.todo_input);
         todoSubmit = (Button) findViewById(R.id.todo_submit);
         todoTasks = (ListView) findViewById(R.id.todo_tasks);
-        todoTasks.setAdapter(new TaskAdapter(this, R.layout.task, taskList));
-        for (int i=0; i< 100 ; i++) {
-            taskList.add(new Task("Go to lunch." + i));
-        }
-
+        todoTasks.setAdapter(taskAdapter);
     }
 
     private void setListeners() {
-        todoSubmit.setOnClickListener(onSubmit);
+        todoSubmit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                inputText = UserInputHelper.getString(todoInput.getText().toString());
+                if (!inputText.matches("")) {
+                    Task task = new Task(inputText);
+                    taskAdapter.add(task);
+                    todoInput.setText("");
+                    todoInput.clearFocus();
+                }
+            }
+        });
     }
 
     private void setDefaults() {

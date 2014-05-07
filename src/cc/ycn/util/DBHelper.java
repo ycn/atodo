@@ -8,7 +8,7 @@ import cc.ycn.dao.TaskProvider;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "todo.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
     private static DBHelper instance;
 
     private DBHelper(Context context) {
