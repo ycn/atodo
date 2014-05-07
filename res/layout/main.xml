@@ -20,7 +20,7 @@
                 android:layout_weight="80"
                 android:hint="@string/todo_input_hint"
                 android:singleLine="true"
-                android:maxLength="50"/>
+                android:maxLength="100"/>
 
         <Button
                 android:id="@+id/todo_submit"

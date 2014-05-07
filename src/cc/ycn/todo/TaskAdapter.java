@@ -109,11 +109,12 @@ public class TaskAdapter extends BaseAdapter {
         values.put("done", task.done);
         values.put("updateTime", System.currentTimeMillis());
         resolver.update(TaskProvider.TASK_ALL_URI, values, "_id = ?", new String[]{task._id + ""});
+        taskList.remove(task);
         notifyDataSetChanged();
     }
 
     public void queryList() {
-        Cursor cursor = resolver.query(TaskProvider.TASK_ALL_URI, null, null, null, null);
+        Cursor cursor = resolver.query(TaskProvider.TASK_ALL_URI, null, "done = ?", new String[]{"0"}, null);
         while (cursor.moveToNext()) {
             Task task = new Task(cursor.getString(cursor.getColumnIndex("content")));
             task._id = cursor.getInt(cursor.getColumnIndex("_id"));
