@@ -1,16 +1,27 @@
 package cc.ycn.todo;
 
 import android.app.Activity;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.CheckBox;
+import android.widget.TextView;
 import cc.ycn.view.Task;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
 public class TaskAdapter extends BaseAdapter {
+
+    private static class ViewHolder {
+        Task task;
+        CheckBox checkBox;
+    }
 
     private Activity context;
     private int resourceId;
@@ -43,8 +54,26 @@ public class TaskAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = context.getLayoutInflater();
-//        View row;
-//        row = View.inflate(resourceId, parent, false);
-        return null;
+        View row = inflater.inflate(resourceId, parent, false);
+
+        CheckBox taskCheck = (CheckBox) row.findViewById(R.id.task_check);
+        TextView taskContent = (TextView) row.findViewById(R.id.task_content);
+        TextView taskMeta = (TextView) row.findViewById(R.id.task_meta);
+
+        Task task = taskList.get(position);
+        taskContent.setText(task.content);
+        taskMeta.setText(getDate(task.createTime));
+
+        return row;
+    }
+
+    private String getDate(long timeStamp) {
+        try {
+            DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date netDate = (new Date(timeStamp));
+            return sdf.format(netDate);
+        } catch (Exception e) {
+            return "N/A";
+        }
     }
 }

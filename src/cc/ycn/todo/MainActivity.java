@@ -29,19 +29,19 @@ public class MainActivity extends Activity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate");
+        initStates();
         appSetup();
         findViews();
         setListeners();
-        initStates();
+        setDefaults();
     }
 
     private void initStates() {
         settings = getSharedPreferences(TAG, MODE_PRIVATE);
         Log.d(TAG, "SharedPreferences:" + settings.getAll().toString());
         taskList = new LinkedList<Task>();
-        inputText = settings.getString("inputText", "");
-        ViewUtils.setInputText(todoInput, inputText);
     }
+
 
     private void appSetup() {
         setContentView(R.layout.main);
@@ -52,10 +52,19 @@ public class MainActivity extends Activity {
         todoSubmit = (Button) findViewById(R.id.todo_submit);
         todoTasks = (ListView) findViewById(R.id.todo_tasks);
         todoTasks.setAdapter(new TaskAdapter(this, R.layout.task, taskList));
+        for (int i=0; i< 100 ; i++) {
+            taskList.add(new Task("Go to lunch." + i));
+        }
+
     }
 
     private void setListeners() {
 
+    }
+
+    private void setDefaults() {
+        inputText = settings.getString("inputText", "");
+        ViewUtils.setInputText(todoInput, inputText);
     }
 
     @Override

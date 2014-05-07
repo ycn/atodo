@@ -28,17 +28,17 @@
                 android:text="@string/todo_submit_text"/>
     </LinearLayout>
 
-    <ScrollView
-            android:id="@+id/todo_scroll"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scrollbars="vertical">
-            <ListView
-                    android:id="@+id/todo_tasks"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-            </ListView>
-    </ScrollView>
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
+
+        <ListView
+                android:id="@+id/todo_tasks"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent">
+        </ListView>
+    </LinearLayout>
 
 </LinearLayout>
 
