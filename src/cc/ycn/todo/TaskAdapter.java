@@ -1,12 +1,12 @@
 package cc.ycn.todo;
 
 import android.app.Activity;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.TextView;
 import cc.ycn.view.Task;
 
@@ -19,13 +19,15 @@ import java.util.List;
 public class TaskAdapter extends BaseAdapter {
 
     private static class ViewHolder {
-        Task task;
-        CheckBox checkBox;
+        CheckBox taskCheck;
+        TextView taskContent;
+        TextView taskMeta;
     }
 
     private Activity context;
     private int resourceId;
     private List<Task> taskList;
+
 
     public TaskAdapter(Activity context, int resourceId, List<Task> taskList) {
         this.context = context;
@@ -52,19 +54,36 @@ public class TaskAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = context.getLayoutInflater();
-        View row = inflater.inflate(resourceId, parent, false);
+    public View getView(final int position, View convertView, ViewGroup parent) {
+        ViewHolder holder;
 
-        CheckBox taskCheck = (CheckBox) row.findViewById(R.id.task_check);
-        TextView taskContent = (TextView) row.findViewById(R.id.task_content);
-        TextView taskMeta = (TextView) row.findViewById(R.id.task_meta);
+        if (convertView == null) {
+            LayoutInflater inflater = context.getLayoutInflater();
+            convertView = inflater.inflate(resourceId, parent, false);
+
+            holder = new ViewHolder();
+            holder.taskCheck = (CheckBox) convertView.findViewById(R.id.task_check);
+            holder.taskCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    taskList.get(position).done = isChecked;
+                }
+            });
+            holder.taskContent = (TextView) convertView.findViewById(R.id.task_content);
+            holder.taskMeta = (TextView) convertView.findViewById(R.id.task_meta);
+
+            convertView.setTag(holder);
+        } else {
+            holder = (ViewHolder) convertView.getTag();
+        }
+
 
         Task task = taskList.get(position);
-        taskContent.setText(task.content);
-        taskMeta.setText(getDate(task.createTime));
+        holder.taskCheck.setChecked(task.done);
+        holder.taskContent.setText(task.content);
+        holder.taskMeta.setText(getDate(task.createTime));
 
-        return row;
+        return convertView;
     }
 
     private String getDate(long timeStamp) {

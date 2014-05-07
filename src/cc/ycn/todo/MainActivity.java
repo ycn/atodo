@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -22,7 +23,18 @@ public class MainActivity extends Activity {
     private Button todoSubmit;
     private String inputText;
     private ListView todoTasks;
-    private List<Task> taskList;
+    private LinkedList<Task> taskList;
+
+
+    private View.OnClickListener onSubmit = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            inputText = UserInputHelper.getString(todoInput.getText().toString());
+            if (inputText != "") {
+                taskList.add(0, new Task(inputText));
+            }
+        }
+    };
 
 
     @Override
@@ -59,12 +71,12 @@ public class MainActivity extends Activity {
     }
 
     private void setListeners() {
-
+        todoSubmit.setOnClickListener(onSubmit);
     }
 
     private void setDefaults() {
         inputText = settings.getString("inputText", "");
-        ViewUtils.setInputText(todoInput, inputText);
+        ViewUtils.setInputText(todoInput, inputText, 0);
     }
 
     @Override
@@ -102,7 +114,7 @@ public class MainActivity extends Activity {
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         Log.d(TAG, "onRestoreInstanceState");
-        ViewUtils.setInputText(todoInput, inputText);
+        ViewUtils.setInputText(todoInput, inputText, 0);
     }
 
     @Override
