@@ -17,7 +17,8 @@ public class Task extends BaseView {
     public String toString() {
         StringBuffer buff = new StringBuffer();
         buff.append("[");
-        buff.append("content=" + content);
+        buff.append("id=" + _id);
+        buff.append(",content=" + content);
         buff.append(",done=" + done);
         buff.append("]");
         return buff.toString();

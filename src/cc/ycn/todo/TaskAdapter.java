@@ -4,12 +4,16 @@ import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.net.Uri;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.StrikethroughSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.CheckBox;
-import android.widget.CompoundButton;
 import android.widget.TextView;
 import cc.ycn.dao.TaskProvider;
 import cc.ycn.view.Task;
@@ -21,6 +25,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class TaskAdapter extends BaseAdapter {
+    private static final String TAG = "aTodo_TaskAdapter";
 
     private static class ViewHolder {
         CheckBox taskCheck;
@@ -77,18 +82,7 @@ public class TaskAdapter extends BaseAdapter {
             holder = (ViewHolder) convertView.getTag();
         }
 
-
-        final Task task = taskList.get(position);
-        holder.taskCheck.setChecked(task.done);
-        holder.taskCheck.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                done(task, isChecked);
-            }
-        });
-        holder.taskContent.setText(task.content);
-        holder.taskMeta.setText(getDate(task.createTime));
-
+        drawTask(position, holder);
         return convertView;
     }
 
@@ -99,18 +93,42 @@ public class TaskAdapter extends BaseAdapter {
         values.put("createTime", task.createTime);
         values.put("updateTime", task.updateTime);
         values.put("done", task.done);
-        resolver.insert(TaskProvider.TASK_ALL_URI, values);
+        Uri result = resolver.insert(TaskProvider.TASK_ALL_URI, values);
+        Log.d(TAG, "onAdd:" + task + "|result:" + result);
         notifyDataSetChanged();
     }
 
-    public void done(Task task, boolean done) {
+    public void done(boolean done, int position, ViewHolder holder) {
+        Task task = taskList.get(position);
         task.done = done;
         ContentValues values = new ContentValues();
         values.put("done", task.done);
         values.put("updateTime", System.currentTimeMillis());
-        resolver.update(TaskProvider.TASK_ALL_URI, values, "_id = ?", new String[]{task._id + ""});
-        taskList.remove(task);
-        notifyDataSetChanged();
+        int result = resolver.update(TaskProvider.TASK_ALL_URI, values, "_id = ?", new String[]{task._id + ""});
+        // taskList.remove(task);
+        Log.d(TAG, "onDone:" + task + "|position:" + position + "|result:" + result);
+        drawTask(position, holder);
+    }
+
+    private void drawTask(final int position, final ViewHolder holder) {
+        Task task = taskList.get(position);
+        holder.taskCheck.setChecked(task.done);
+        holder.taskCheck.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean isChecked = holder.taskCheck.isChecked();
+                done(isChecked, position, holder);
+            }
+        });
+        if (task.done) {
+            SpannableString sp = new SpannableString(task.content);
+            sp.setSpan(new StrikethroughSpan(), 0, task.content.length(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            holder.taskContent.setText(sp);
+        } else {
+            holder.taskContent.setText(task.content);
+        }
+        holder.taskMeta.setText(getDate(task.createTime));
+        Log.d(TAG, "drawTask:" + task + "|position:" + position);
     }
 
     public void queryList() {
@@ -127,7 +145,7 @@ public class TaskAdapter extends BaseAdapter {
 
     private String getDate(long timeStamp) {
         try {
-            DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            DateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
             Date netDate = (new Date(timeStamp));
             return sdf.format(netDate);
         } catch (Exception e) {
